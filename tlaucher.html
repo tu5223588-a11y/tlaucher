@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLOP Client ULTIMATE | ATLP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #00ffcc;
+            --secondary: #ff00ff;
+            --bg-color: #0a0a0a;
+            --panel-bg: rgba(255, 255, 255, 0.05);
+            --text-color: #ffffff;
+            --border: rgba(255, 255, 255, 0.1);
+            --glow: 0 0 15px var(--primary);
+        }
+
+        [data-theme="light"] {
+            --primary: #0066ff;
+            --secondary: #ff0066;
+            --bg-color: #f0f0f0;
+            --panel-bg: rgba(0, 0, 0, 0.05);
+            --text-color: #000000;
+            --border: rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background: linear-gradient(-45deg, #0a0a0a, #1a1a2e, #16213e, #0f3460);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-color);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: 0.5s;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #particles-js { position: fixed; width: 100%; height: 100%; z-index: -1; top: 0; left: 0; pointer-events: none;}
+
+        .hidden { display: none !important; }
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 2000;
+            display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(15px);
+        }
+        .modal-box {
+            background: rgba(20, 20, 20, 0.9); border: 2px solid var(--primary);
+            padding: 30px; border-radius: 20px; width: 95%; max-width: 600px;
+            box-shadow: var(--glow); color: white; animation: zoomIn 0.3s;
+        }
+
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: red; cursor: pointer; }
+
+        .settings-btn {
+            position: fixed; bottom: 20px; left: 20px;
+            width: 50px; height: 50px; background: rgba(0,0,0,0.5); border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; z-index: 1000; border: 2px solid var(--primary);
+            box-shadow: var(--glow); transition: 0.3s;
+        }
+        .settings-panel {
+            position: fixed; bottom: 80px; left: 20px;
+            background: rgba(0,0,0,0.8); padding: 15px; border-radius: 15px;
+            border: 1px solid var(--primary); z-index: 1000;
+            backdrop-filter: blur(10px); display: flex; flex-direction: column; gap: 10px;
+        }
+
+        .main-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; padding-top: 100px; }
+        .container {
+            display: flex; width: 92%; max-width: 1400px; min-height: 80vh;
+            background: var(--panel-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            position: relative; overflow: hidden; margin-bottom: 50px;
+        }
+
+        /* 3D CRYSTAL BLOCK (No Images) */
+        .left-side { flex: 1; min-width: 300px; display: flex; justify-content: center; align-items: center; }
+        .dirt-container { width: 150px; height: 150px; position: relative; transform-style: preserve-3d; animation: rotate3D 10s linear infinite; }
+        .dirt-cube {
+            width: 100%; height: 100%; position: absolute;
+            background: rgba(0, 255, 204, 0.2); border: 2px solid var(--primary);
+            box-shadow: inset 0 0 30px var(--primary);
+        }
+        @keyframes rotate3D { 
+            0% { transform: rotateX(0) rotateY(0); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+        }
+
+        .right-side { flex: 1.5; padding: 40px; text-align: center; }
+        
+        .nav-grid { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; }
+        .nav-btn {
+            width: 60px; height: 60px; border-radius: 15px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; transition: 0.3s; color: white;
+        }
+        .nav-btn:hover, .nav-btn.active { border-color: var(--primary); box-shadow: var(--glow); transform: translateY(-5px); }
+        
+        .page-content { display: none; width: 100%; animation: fadeIn 0.5s; flex-direction: column; align-items: center; }
+        .page-content.active { display: flex; }
+
+        .main-title { 
+            font-family: 'Orbitron'; font-size: 3.5rem; font-weight: 900; 
+            background: linear-gradient(90deg, var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; color: transparent; margin-bottom: 5px;
+            filter: drop-shadow(0 0 10px rgba(0,255,204,0.5));
+        }
+        .subtitle { color: var(--secondary); font-weight: bold; letter-spacing: 4px; margin-bottom: 30px; }
+
+        .history-box { 
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border); 
+            padding: 25px; border-radius: 20px; text-align: left; width: 100%;
+        }
+
+        .big-action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; width: 100%; margin: 30px 0; }
+        .action-card {
+            height: 120px; border-radius: 20px; border: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.3s; background: rgba(0,0,0,0.2);
+        }
+        .action-card:hover { transform: scale(1.05); border-color: var(--primary); box-shadow: var(--glow); }
+
+        .dl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; width: 100%; }
+        .dl-item { 
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            padding: 20px; border-radius: 15px; transition: 0.3s; color: white;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        .dl-item:hover { border-color: var(--primary); background: rgba(0, 255, 204, 0.05); }
+        .dl-item i { font-size: 2.5rem; color: var(--primary); }
+
+        .long-section { text-align: left; background: rgba(0,0,0,0.2); padding: 30px; border-radius: 20px; margin-top: 30px; border-left: 5px solid var(--primary); width: 100%; }
+        .long-section h2 { font-family: 'Orbitron'; color: var(--primary); margin-bottom: 15px; }
+
+        .btn-buy { 
+            background: var(--primary); color: #000; border: none; padding: 10px 20px; 
+            font-weight: bold; cursor: pointer; border-radius: 10px; transition: 0.3s;
+        }
+        .btn-buy:hover { box-shadow: var(--glow); transform: scale(1.05); }
+
+        .header-logo { position: absolute; top: 25px; left: 30px; display: flex; align-items: center; gap: 15px; z-index: 100; cursor: pointer; }
+        .logo-box { padding: 5px 15px; border: 2px solid var(--primary); font-family: 'Orbitron'; font-weight: 900; color: var(--primary); box-shadow: var(--glow); }
+        
+        .creator-footer { margin-top: 50px; padding: 40px; width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); }
+
+        .auth-input { width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--primary); color: white; border-radius: 10px; outline: none; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+
+    <div class="header-logo" onclick="goHome()">
+        <div class="logo-box">ATL</div>
+        <div style="font-family: 'Orbitron'; font-weight: 700; font-size: 1.5rem;">ATLOP</div>
+    </div>
+
+    <div class="settings-btn" onclick="toggleSettings()">
+        <i class="fas fa-magic"></i>
+    </div>
+    <div id="settings-panel" class="settings-panel hidden">
+        <button class="btn-buy" onclick="toggleLightMode()">SÁNG / TỐI</button>
+        <button class="btn-buy" style="background:gold;" onclick="openAdmin()">ADMIN LOGIN</button>
+    </div>
+
+    <div style="position:fixed; top:25px; right:30px; display:flex; gap:15px; z-index:100;">
+        <button id="auth-btn" class="btn-buy" onclick="openAuthModal()" style="background: var(--secondary); color: white;"> <i class="fas fa-user"></i> LOGIN</button>
+        <button class="btn-buy" style="background:transparent; border: 1px solid gold; color:gold;"> <i class="fas fa-coins"></i> <span id="money-display">0 $</span></button>
+        <button class="btn-buy" onclick="dailyCheckIn()">CHECK-IN</button>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="container">
+            <div class="left-side">
+                <div class="dirt-container">
+                    <div class="dirt-cube" style="transform: rotateY(0deg) translateZ(75px);"></div>
+                    <div class="dirt-cube" style="transform: rotateY(90deg) translateZ(75px);"></div>
+                    <div class="dirt-cube" style="transform: rotateY(180deg) translateZ(75px);"></div>
+                    <div class="dirt-cube" style="transform: rotateY(-90deg) translateZ(75px);"></div>
+                    <div class="dirt-cube" style="transform: rotateX(90deg) translateZ(75px);"></div>
+                    <div class="dirt-cube" style="transform: rotateX(-90deg) translateZ(75px);"></div>
+                </div>
+            </div>
+
+            <div class="right-side">
+                <div class="nav-grid">
+                    <div class="nav-btn active" onclick="showPage('home-page')"><i class="fas fa-home"></i></div>
+                    <div class="nav-btn" onclick="showPage('page-tl')"><b>TL</b></div>
+                    <div class="nav-btn" onclick="showPage('page-clients')"><i class="fas fa-cube"></i></div>
+                    <div class="nav-btn" onclick="showPage('page-cheats')"><i class="fas fa-skull"></i></div>
+                </div>
+
+                <div id="home-page" class="page-content active">
+                    <h1 class="main-title">ATLOP</h1>
+                    <div class="subtitle">PREMIUM MINECRAFT HUB</div>
+
+                    <div class="history-box">
+                        <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fas fa-bolt"></i> SYSTEM INFO</h3>
+                        <p style="font-size: 0.95rem; line-height: 1.6; opacity: 0.8;">
+                            Chào mừng đến với hệ sinh thái ATLOP. Tại đây chúng tôi cung cấp những giải pháp tốt nhất cho trải nghiệm Minecraft của bạn từ Launcher đến các bản Hack/Cheat an toàn nhất.
+                        </p>
+                    </div>
+
+                    <div class="big-action-grid">
+                        <div class="action-card" onclick="openModShop()" style="color: #48ff00;">
+                            <i class="fas fa-boxes" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+                            <b>600+ MODS</b>
+                        </div>
+                        <div class="action-card" onclick="openBugReport()" style="color: #ff4444;">
+                            <i class="fas fa-bug" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+                            <b>REPORT</b>
+                        </div>
+                        <div class="action-card" id="admin-card-btn" style="color: gold;">
+                            <i class="fas fa-crown" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+                            <b>ADMIN CP</b>
+                        </div>
+                    </div>
+
+                    <div class="long-section">
+                        <h2>1. GIỚI THIỆU HỆ THỐNG</h2>
+                        <p>Hệ thống được thiết kế tối ưu hóa cho hiệu suất cao nhất. Không sử dụng hình ảnh giúp giảm thời gian tải trang xuống mức tối thiểu nhưng vẫn đảm bảo thẩm mỹ bằng hiệu ứng đổ bóng và ánh sáng neon.</p>
+                    </div>
+
+                    <div class="long-section">
+                        <h2>2. BẢNG XẾP HẠNG CHEATS</h2>
+                        <div style="display: grid; gap: 15px;">
+                            <div style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                <span><b>1. METEOR CLIENT</b></span>
+                                <span style="color: var(--primary);">UNBEATABLE</span>
+                            </div>
+                            <div style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                <span><b>2. WURST CLIENT</b></span>
+                                <span style="color: var(--primary);">LEGENDARY</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 40px; font-family: 'Orbitron'; letter-spacing: 2px; opacity: 0.5;">✦ DESIGN BY ATLP ✦</div>
+                </div>
+
+                <div id="page-tl" class="page-content">
+                    <h2 class="main-title" style="font-size: 2.5rem;">LAUNCHERS</h2>
+                    <div class="dl-grid" id="launcher-list"></div>
+                </div>
+
+                <div id="page-clients" class="page-content">
+                    <h2 class="main-title" style="font-size: 2.5rem;">CLIENTS</h2>
+                    <div class="dl-grid" id="client-list"></div>
+                </div>
+
+                <div id="page-cheats" class="page-content">
+                    <h2 class="main-title" style="font-size: 2.5rem; color: #ff4444;">CHEATS</h2>
+                    <div class="dl-grid" id="cheat-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="creator-footer">
+            <div>
+                <h4 style="color: var(--primary);">HỆ THỐNG</h4>
+                <p style="opacity: 0.6; font-size: 0.85rem; margin-top: 10px;">Phát triển bởi ATLP. Toàn bộ mã nguồn được tối ưu hóa hiệu suất.</p>
+            </div>
+            <div>
+                <h4 style="color: var(--secondary);">CỘNG ĐỒNG</h4>
+                <p style="opacity: 0.6; font-size: 0.85rem; margin-top: 10px;">Hỗ trợ hơn 10,000 người chơi hàng tháng trên toàn thế giới.</p>
+            </div>
+            <div style="text-align: right;">
+                <h4 style="color: gold;">BẢN QUYỀN</h4>
+                <p style="opacity: 0.6; font-size: 0.85rem; margin-top: 10px;">&copy; 2024 ATLP HUB. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div id="auth-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <span class="modal-close" onclick="closeModal('auth-modal')">&times;</span>
+            <h2 id="auth-title" style="color: var(--primary); text-align: center; margin-bottom: 25px;">ĐĂNG NHẬP</h2>
+            <input type="text" id="auth-user" class="auth-input" placeholder="Tài khoản">
+            <input type="password" id="auth-pass" class="auth-input" placeholder="Mật khẩu">
+            <button class="btn-buy" style="width: 100%; height: 50px;" onclick="handleAuth()">XÁC NHẬN</button>
+            <p id="auth-switch" style="text-align: center; margin-top: 20px; cursor: pointer; opacity: 0.7;" onclick="switchAuth()">Chưa có tài khoản? Tạo ngay</p>
+        </div>
+    </div>
+
+    <!-- MOD SHOP MODAL -->
+    <div id="mod-modal" class="modal-overlay hidden">
+        <div class="modal-box" style="max-width: 900px;">
+            <span class="modal-close" onclick="closeModal('mod-modal')">&times;</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: var(--primary);">MOD STORE</h2>
+                <div style="color: gold;">Balance: <span id="shop-balance">0 $</span></div>
+            </div>
+            <div class="dl-grid" id="mod-container" style="max-height: 400px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS("particles-js", {"particles":{"number":{"value":60},"color":{"value":"#00ffcc"},"opacity":{"value":0.2},"size":{"value":3},"line_linked":{"enable":true,"distance":150,"color":"#00ffcc","opacity":0.1},"move":{"enable":true,"speed":1}}});
+
+        let userMoney = parseInt(localStorage.getItem('atlop_money')) || 0;
+        let currentUser = localStorage.getItem('atlop_user') || null;
+        let isLoginMode = true;
+
+        function updateUI() {
+            document.getElementById('money-display').innerText = userMoney + " $";
+            if(currentUser) document.getElementById('auth-btn').innerText = currentUser.toUpperCase();
+        }
+        updateUI();
+
+        const data = {
+            launchers: ["TLauncher", "TL Legacy", "SKLauncher", "PojavLauncher", "ATLauncher", "Prism"],
+            clients: ["Lunar Client", "Badlion", "Feather", "LabyMod", "Salwyrr", "PvPLounge"],
+            cheats: ["Meteor Client", "Wurst", "LiquidBounce", "Aristois", "Future", "Vape V4"]
+        };
+
+        function renderAll() {
+            const render = (id, list, icon) => {
+                const el = document.getElementById(id);
+                el.innerHTML = list.map(item => `
+                    <div class="dl-item">
+                        <i class="fas ${icon}"></i>
+                        <b>${item}</b>
+                        <button class="btn-buy" style="padding: 5px 15px; font-size: 0.7rem;">DOWNLOAD</button>
+                    </div>
+                `).join('');
+            };
+            render('launcher-list', data.launchers, 'fa-rocket');
+            render('client-list', data.clients, 'fa-cube');
+            render('cheat-list', data.cheats, 'fa-user-secret');
+        }
+        renderAll();
+
+        function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
+        function switchAuth() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-title').innerText = isLoginMode ? "ĐĂNG NHẬP" : "ĐĂNG KÝ";
+            document.getElementById('auth-switch').innerText = isLoginMode ? "Chưa có tài khoản? Đăng ký" : "Đã có tài khoản? Đăng nhập";
+        }
+
+        function handleAuth() {
+            const u = document.getElementById('auth-user').value;
+            if(!u) return alert("Nhập tên!");
+            currentUser = u;
+            localStorage.setItem('atlop_user', u);
+            updateUI();
+            closeModal('auth-modal');
+        }
+
+        function openModShop() {
+            document.getElementById('mod-modal').classList.remove('hidden');
+            document.getElementById('shop-balance').innerText = userMoney + " $";
+            const container = document.getElementById('mod-container');
+            container.innerHTML = Array.from({length: 20}, (_, i) => `
+                <div class="dl-item">
+                    <b style="color:var(--primary)">Premium Mod #${i+1}</b>
+                    <span style="color:gold">50 $</span>
+                    <button class="btn-buy" onclick="buyMod(50)">MUA</button>
+                </div>
+            `).join('');
+        }
+
+        function buyMod(p) {
+            if(userMoney < p) return alert("Hết tiền!");
+            userMoney -= p;
+            localStorage.setItem('atlop_money', userMoney);
+            updateUI();
+            alert("Mua thành công!");
+        }
+
+        function dailyCheckIn() {
+            const last = localStorage.getItem('atlop_last');
+            if(last === new Date().toDateString()) return alert("Hôm nay đã điểm danh!");
+            userMoney += 100;
+            localStorage.setItem('atlop_money', userMoney);
+            localStorage.setItem('atlop_last', new Date().toDateString());
+            updateUI();
+            alert("Đã nhận 100$!");
+        }
+
+        function showPage(p) {
+            document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(p).classList.add('active');
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden'); }
+        function toggleLightMode() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
+        function goHome() { showPage('home-page'); }
+    </script>
+</body>
+</html>
