@@ -3,406 +3,657 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATLOP Client ULTIMATE | ATLP</title>
+    <title>ATLOP Client ULTIMATE | Đặng Phúc Anh</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+code
+Code
+<style>
+    :root {
+        --primary: #00ffcc;
+        --secondary: #ff00ff;
+        --bg-color: #0a0a0a;
+        --panel-bg: rgba(0, 0, 0, 0.7);
+        --text-color: #ffffff;
+        --border: rgba(255, 255, 255, 0.2);
+        --dirt-glow: #48ff00;
+    }
+
+    /* LIGHT MODE VARIABLES */
+    [data-theme="light"] {
+        --primary: #0066ff;
+        --secondary: #ff0066;
+        --bg-color: #f0f0f0;
+        --panel-bg: rgba(255, 255, 255, 0.8);
+        --text-color: #000000;
+        --border: rgba(0, 0, 0, 0.2);
+        --dirt-glow: #00ff00;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        overflow-x: hidden;
+        min-height: 100vh;
+        background-image: url('https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?q=80&w=2072&auto=format&fit=crop');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        transition: background 0.5s, color 0.5s;
+    }
+
+    /* Lớp phủ để làm mờ background gốc khi bật Light Mode */
+    body[data-theme="light"]::before {
+        content: ''; position: fixed; top:0; left:0; width:100%; height:100%;
+        background: rgba(255,255,255,0.7); z-index: -1;
+    }
+    body:not([data-theme="light"])::before {
+        content: ''; position: fixed; top:0; left:0; width:100%; height:100%;
+        background: rgba(0,0,0,0.6); z-index: -1;
+    }
+
+    #particles-js { position: fixed; width: 100%; height: 100%; z-index: -1; top: 0; left: 0; pointer-events: none;}
+
+    /* --- UI UTILS --- */
+    .hidden { display: none !important; }
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.9); z-index: 2000;
+        display: flex; justify-content: center; align-items: center;
+        backdrop-filter: blur(10px);
+    }
+    .modal-box {
+        background: #1a1a1a; border: 2px solid var(--primary);
+        padding: 20px; border-radius: 15px; width: 95%; max-width: 1000px;
+        max-height: 90vh; overflow-y: auto; position: relative;
+        box-shadow: 0 0 30px var(--primary); color: white;
+        animation: zoomIn 0.3s;
+    }
+    [data-theme="light"] .modal-box { background: #fff; color: #000; }
+
+    .modal-close { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: red; cursor: pointer; z-index: 10; }
+
+    /* --- SETTINGS PANEL (THEME) --- */
+    .settings-btn {
+        position: fixed; bottom: 20px; left: 20px;
+        width: 50px; height: 50px; background: #333; border-radius: 50%;
+        display: flex; justify-content: center; align-items: center;
+        cursor: pointer; z-index: 1000; border: 2px solid var(--primary);
+        box-shadow: 0 0 10px var(--primary); transition: 0.3s;
+    }
+    .settings-btn:hover { transform: rotate(180deg); }
+    .settings-panel {
+        position: fixed; bottom: 80px; left: 20px;
+        background: var(--panel-bg); padding: 15px; border-radius: 10px;
+        border: 1px solid var(--primary); z-index: 1000;
+        display: flex; flex-direction: column; gap: 10px;
+        backdrop-filter: blur(5px);
+    }
+    .color-picker { display: flex; gap: 5px; }
+    .color-dot { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 2px solid white; }
+
+    /* --- CONTAINER --- */
+    .main-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; padding-top: 80px; }
+    .container {
+        display: flex; width: 92%; max-width: 1400px; min-height: 85vh;
+        background: var(--panel-bg); backdrop-filter: blur(15px);
+        border: 1px solid var(--border); border-radius: 20px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+        position: relative; overflow: hidden; margin-bottom: 50px;
+        flex-wrap: wrap;
+    }
+
+    /* --- LEFT SIDE & DIRT BLOCK FX --- */
+    .left-side { flex: 1; min-width: 300px; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; }
     
-    <style>
-        :root {
-            --primary: #00ffcc;
-            --secondary: #ff00ff;
-            --bg-color: #0a0a0a;
-            --panel-bg: rgba(255, 255, 255, 0.05);
-            --text-color: #ffffff;
-            --border: rgba(255, 255, 255, 0.1);
-            --glow: 0 0 15px var(--primary);
-        }
+    .dirt-container {
+        width: 200px; height: 200px; position: relative;
+        transform-style: preserve-3d; animation: floatDirt 3s ease-in-out infinite;
+    }
+    .dirt-cube {
+        width: 100%; height: 100%;
+        background-image: url('https://static.wikia.nocookie.net/minecraft_gamepedia/images/2/2f/Dirt.png');
+        background-size: cover; image-rendering: pixelated;
+        box-shadow: 0 0 50px var(--dirt-glow), inset 0 0 20px black;
+        border: 2px solid rgba(255,255,255,0.2);
+        position: relative; z-index: 2;
+    }
+    .dirt-particles {
+        position: absolute; width: 100%; height: 100%; top: 0; left: 0;
+        border-radius: 50%; border: 2px dashed var(--dirt-glow);
+        animation: spin 10s linear infinite; opacity: 0.6; pointer-events: none;
+    }
+    .dirt-halo {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 280px; height: 280px; background: radial-gradient(circle, var(--dirt-glow) 0%, transparent 70%);
+        opacity: 0.3; z-index: 1; animation: pulseDirt 2s infinite;
+    }
 
-        [data-theme="light"] {
-            --primary: #0066ff;
-            --secondary: #ff0066;
-            --bg-color: #f0f0f0;
-            --panel-bg: rgba(0, 0, 0, 0.05);
-            --text-color: #000000;
-            --border: rgba(0, 0, 0, 0.1);
-        }
+    /* --- RIGHT SIDE --- */
+    .right-side { flex: 1.5; padding: 30px; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; }
+    
+    /* Navigation Buttons */
+    .nav-grid { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; justify-content: center; }
+    .nav-btn {
+        width: 60px; height: 60px; border-radius: 12px;
+        background: rgba(0,0,0,0.3); border: 2px solid #444;
+        display: flex; justify-content: center; align-items: center;
+        cursor: pointer; transition: 0.3s; position: relative; overflow: hidden;
+    }
+    .nav-btn:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 5px 15px var(--primary); }
+    .nav-btn.active { border-color: var(--primary); background: rgba(0,255,204,0.1); }
+    
+    /* Content Areas */
+    .page-content { display: none; width: 100%; animation: fadeIn 0.4s; flex-direction: column; align-items: center; }
+    .page-content.active { display: flex; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    /* Typography */
+    .main-title { 
+        font-family: 'Orbitron'; font-size: 3rem; font-weight: 900; 
+        background: linear-gradient(90deg, var(--primary), var(--secondary)); 
+        -webkit-background-clip: text; color: transparent; margin-bottom: 10px;
+        text-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    .subtitle { color: var(--secondary); font-weight: bold; letter-spacing: 2px; margin-bottom: 20px; }
 
-        body {
-            background: linear-gradient(-45deg, #0a0a0a, #1a1a2e, #16213e, #0f3460);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            color: var(--text-color);
-            overflow-x: hidden;
-            min-height: 100vh;
-            transition: 0.5s;
-        }
+    /* History & Pros/Cons */
+    .history-box { 
+        background: rgba(0,0,0,0.2); border: 1px solid var(--border); 
+        padding: 20px; border-radius: 10px; text-align: left; width: 100%; margin-bottom: 20px;
+    }
+    .pros-cons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 15px; }
+    .pc-col h4 { font-family: 'Orbitron'; margin-bottom: 10px; border-bottom: 2px solid; padding-bottom: 5px; }
+    .pros h4 { color: #00ff00; border-color: #00ff00; }
+    .cons h4 { color: #ff0000; border-color: #ff0000; }
+    .pc-list li { list-style: none; margin-bottom: 5px; font-size: 0.9rem; position: relative; padding-left: 20px; }
+    .pros li::before { content: '✓'; color: #00ff00; position: absolute; left: 0; }
+    .cons li::before { content: '✕'; color: #ff0000; position: absolute; left: 0; }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+    /* Big Action Buttons */
+    .big-action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 20px; width: 100%; margin-bottom: 30px; }
+    .action-card {
+        height: 140px; border-radius: 15px; border: 2px solid transparent;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        cursor: pointer; transition: 0.3s; position: relative; background: rgba(0,0,0,0.4);
+        text-align: center; overflow: hidden;
+    }
+    .action-card:hover { transform: scale(1.05); }
+    .card-mod { border-color: #48ff00; } .card-mod:hover { box-shadow: 0 0 20px #48ff00; }
+    .card-bug { border-color: #ff4444; } .card-bug:hover { box-shadow: 0 0 20px #ff4444; }
+    .card-admin { border-color: gold; display: none; } .card-admin:hover { box-shadow: 0 0 20px gold; }
 
-        #particles-js { position: fixed; width: 100%; height: 100%; z-index: -1; top: 0; left: 0; pointer-events: none;}
+    /* --- DOWNLOAD GRIDS --- */
+    .dl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; width: 100%; }
+    .dl-item { 
+        background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+        padding: 15px; border-radius: 10px; text-decoration: none; color: inherit;
+        display: flex; flex-direction: column; align-items: center; transition: 0.2s;
+    }
+    .dl-item:hover { background: rgba(255,255,255,0.1); border-color: var(--primary); }
+    .dl-item img { width: 40px; height: 40px; margin-bottom: 10px; object-fit: contain; }
 
-        .hidden { display: none !important; }
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 2000;
-            display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(15px);
-        }
-        .modal-box {
-            background: rgba(20, 20, 20, 0.9); border: 2px solid var(--primary);
-            padding: 30px; border-radius: 20px; width: 95%; max-width: 600px;
-            box-shadow: var(--glow); color: white; animation: zoomIn 0.3s;
-        }
+    /* --- MEGA MOD STORE --- */
+    .shop-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .search-bar { flex: 1; padding: 10px; border-radius: 5px; border: 1px solid var(--primary); background: #222; color: white; outline: none; }
+    .mod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; width: 100%; max-height: 60vh; overflow-y: auto; padding-right: 5px; }
+    .mod-card { 
+        background: #222; border: 1px solid #444; padding: 10px; border-radius: 8px;
+        display: flex; flex-direction: column; gap: 5px; position: relative;
+    }
+    [data-theme="light"] .mod-card { background: #eee; color: black; border-color: #ccc; }
+    .mod-price { font-weight: bold; color: var(--dirt-glow); margin-top: auto; }
+    .btn-buy { background: var(--primary); color: #000; border: none; padding: 5px; font-weight: bold; cursor: pointer; border-radius: 4px; }
 
-        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: red; cursor: pointer; }
+    /* Header Logo */
+    .header-logo { position: absolute; top: 20px; left: 30px; display: flex; align-items: center; gap: 10px; z-index: 100; cursor: pointer; }
+    .logo-box { background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff); -webkit-background-clip: text; color: transparent; font-family: 'Orbitron'; font-weight: 900; font-size: 2rem; border: 2px solid white; padding: 5px 10px; }
+    .logo-text { font-family: 'Orbitron'; font-weight: 700; font-size: 1.5rem; color: var(--text-color); }
 
-        .settings-btn {
-            position: fixed; bottom: 20px; left: 20px;
-            width: 50px; height: 50px; background: rgba(0,0,0,0.5); border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; z-index: 1000; border: 2px solid var(--primary);
-            box-shadow: var(--glow); transition: 0.3s;
-        }
-        .settings-panel {
-            position: fixed; bottom: 80px; left: 20px;
-            background: rgba(0,0,0,0.8); padding: 15px; border-radius: 15px;
-            border: 1px solid var(--primary); z-index: 1000;
-            backdrop-filter: blur(10px); display: flex; flex-direction: column; gap: 10px;
-        }
+    /* --- NEW LONG SECTIONS STYLES --- */
+    .long-section { text-align: left; background: rgba(0,0,0,0.3); padding: 25px; border-radius: 15px; margin-top: 30px; border-left: 5px solid var(--primary); width: 100%; }
+    .long-section h2 { font-family: 'Orbitron'; color: var(--primary); margin-bottom: 15px; text-transform: uppercase; }
+    .long-section p { line-height: 1.8; margin-bottom: 10px; font-size: 0.95rem; }
+    .rank-item { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 10px; border-radius: 8px; }
+    .rank-num { font-size: 1.5rem; font-weight: 900; color: var(--secondary); min-width: 30px; }
+    .creator-footer { margin-top: 50px; padding: 30px; border-top: 1px solid var(--border); width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; background: rgba(0,0,0,0.5); }
 
-        .main-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; padding-top: 100px; }
-        .container {
-            display: flex; width: 92%; max-width: 1400px; min-height: 80vh;
-            background: var(--panel-bg); backdrop-filter: blur(20px);
-            border: 1px solid var(--border); border-radius: 30px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
-            position: relative; overflow: hidden; margin-bottom: 50px;
-        }
+    /* Keyframes */
+    @keyframes floatDirt { 0%, 100% { transform: translateY(0) rotate3d(1,1,1,0deg); } 50% { transform: translateY(-20px) rotate3d(1,1,1,10deg); } }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes pulseDirt { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; } 50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; } }
+    @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* 3D CRYSTAL BLOCK (No Images) */
-        .left-side { flex: 1; min-width: 300px; display: flex; justify-content: center; align-items: center; }
-        .dirt-container { width: 150px; height: 150px; position: relative; transform-style: preserve-3d; animation: rotate3D 10s linear infinite; }
-        .dirt-cube {
-            width: 100%; height: 100%; position: absolute;
-            background: rgba(0, 255, 204, 0.2); border: 2px solid var(--primary);
-            box-shadow: inset 0 0 30px var(--primary);
-        }
-        @keyframes rotate3D { 
-            0% { transform: rotateX(0) rotateY(0); }
-            100% { transform: rotateX(360deg) rotateY(360deg); }
-        }
-
-        .right-side { flex: 1.5; padding: 40px; text-align: center; }
-        
-        .nav-grid { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; }
-        .nav-btn {
-            width: 60px; height: 60px; border-radius: 15px;
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; transition: 0.3s; color: white;
-        }
-        .nav-btn:hover, .nav-btn.active { border-color: var(--primary); box-shadow: var(--glow); transform: translateY(-5px); }
-        
-        .page-content { display: none; width: 100%; animation: fadeIn 0.5s; flex-direction: column; align-items: center; }
-        .page-content.active { display: flex; }
-
-        .main-title { 
-            font-family: 'Orbitron'; font-size: 3.5rem; font-weight: 900; 
-            background: linear-gradient(90deg, var(--primary), var(--secondary)); 
-            -webkit-background-clip: text; color: transparent; margin-bottom: 5px;
-            filter: drop-shadow(0 0 10px rgba(0,255,204,0.5));
-        }
-        .subtitle { color: var(--secondary); font-weight: bold; letter-spacing: 4px; margin-bottom: 30px; }
-
-        .history-box { 
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border); 
-            padding: 25px; border-radius: 20px; text-align: left; width: 100%;
-        }
-
-        .big-action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; width: 100%; margin: 30px 0; }
-        .action-card {
-            height: 120px; border-radius: 20px; border: 1px solid var(--border);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.3s; background: rgba(0,0,0,0.2);
-        }
-        .action-card:hover { transform: scale(1.05); border-color: var(--primary); box-shadow: var(--glow); }
-
-        .dl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; width: 100%; }
-        .dl-item { 
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-            padding: 20px; border-radius: 15px; transition: 0.3s; color: white;
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
-        }
-        .dl-item:hover { border-color: var(--primary); background: rgba(0, 255, 204, 0.05); }
-        .dl-item i { font-size: 2.5rem; color: var(--primary); }
-
-        .long-section { text-align: left; background: rgba(0,0,0,0.2); padding: 30px; border-radius: 20px; margin-top: 30px; border-left: 5px solid var(--primary); width: 100%; }
-        .long-section h2 { font-family: 'Orbitron'; color: var(--primary); margin-bottom: 15px; }
-
-        .btn-buy { 
-            background: var(--primary); color: #000; border: none; padding: 10px 20px; 
-            font-weight: bold; cursor: pointer; border-radius: 10px; transition: 0.3s;
-        }
-        .btn-buy:hover { box-shadow: var(--glow); transform: scale(1.05); }
-
-        .header-logo { position: absolute; top: 25px; left: 30px; display: flex; align-items: center; gap: 15px; z-index: 100; cursor: pointer; }
-        .logo-box { padding: 5px 15px; border: 2px solid var(--primary); font-family: 'Orbitron'; font-weight: 900; color: var(--primary); box-shadow: var(--glow); }
-        
-        .creator-footer { margin-top: 50px; padding: 40px; width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); }
-
-        .auth-input { width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--primary); color: white; border-radius: 10px; outline: none; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+    /* Responsive */
+    @media (max-width: 900px) {
+        .container { flex-direction: column; height: auto; }
+        .pros-cons-grid { grid-template-columns: 1fr; }
+    }
+</style>
 </head>
 <body>
     <div id="particles-js"></div>
+code
+Code
+<!-- LOGO -->
+<div class="header-logo" onclick="goHome()">
+    <div class="logo-box">ATL</div>
+    <div class="logo-text">ATLOP</div>
+</div>
 
-    <div class="header-logo" onclick="goHome()">
-        <div class="logo-box">ATL</div>
-        <div style="font-family: 'Orbitron'; font-weight: 700; font-size: 1.5rem;">ATLOP</div>
+<!-- SETTINGS / THEME PICKER -->
+<div class="settings-btn" onclick="toggleSettings()">
+    <i class="fas fa-cog" style="color: var(--primary); font-size: 1.5rem;"></i>
+</div>
+<div id="settings-panel" class="settings-panel hidden">
+    <label style="color:var(--text-color); font-weight:bold;">Màu chủ đạo:</label>
+    <div class="color-picker">
+        <div class="color-dot" style="background:#00ffcc;" onclick="setThemeColor('#00ffcc')"></div>
+        <div class="color-dot" style="background:#ff0000;" onclick="setThemeColor('#ff0000')"></div>
+        <div class="color-dot" style="background:#ff00ff;" onclick="setThemeColor('#ff00ff')"></div>
+        <div class="color-dot" style="background:#ffff00;" onclick="setThemeColor('#ffff00')"></div>
     </div>
+    <label style="color:var(--text-color); font-weight:bold; margin-top:5px;">Chế độ:</label>
+    <button class="btn-buy" onclick="toggleLightMode()">SÁNG / TỐI</button>
+    <button class="btn-buy" style="margin-top:5px; background:gold; color:#000;" onclick="openAdmin()">ĐĂNG NHẬP ADMIN</button>
+</div>
 
-    <div class="settings-btn" onclick="toggleSettings()">
-        <i class="fas fa-magic"></i>
-    </div>
-    <div id="settings-panel" class="settings-panel hidden">
-        <button class="btn-buy" onclick="toggleLightMode()">SÁNG / TỐI</button>
-        <button class="btn-buy" style="background:gold;" onclick="openAdmin()">ADMIN LOGIN</button>
-    </div>
+<!-- USER HUD -->
+<div style="position:fixed; top:20px; right:20px; display:flex; gap:10px; z-index:100;">
+    <button class="btn-buy" style="background:gold; color:black;"> <i class="fas fa-coins"></i> <span id="money-display">0 $</span></button>
+    <button class="btn-buy" onclick="dailyCheckIn()">Điểm Danh</button>
+</div>
 
-    <div style="position:fixed; top:25px; right:30px; display:flex; gap:15px; z-index:100;">
-        <button id="auth-btn" class="btn-buy" onclick="openAuthModal()" style="background: var(--secondary); color: white;"> <i class="fas fa-user"></i> LOGIN</button>
-        <button class="btn-buy" style="background:transparent; border: 1px solid gold; color:gold;"> <i class="fas fa-coins"></i> <span id="money-display">0 $</span></button>
-        <button class="btn-buy" onclick="dailyCheckIn()">CHECK-IN</button>
-    </div>
+<div class="main-wrapper">
+    <div class="container">
+        <!-- LEFT: 3D DIRT BLOCK -->
+        <div class="left-side">
+            <div class="dirt-container">
+                <div class="dirt-halo"></div>
+                <div class="dirt-particles"></div>
+                <div class="dirt-cube"></div>
+            </div>
+        </div>
 
-    <div class="main-wrapper">
-        <div class="container">
-            <div class="left-side">
-                <div class="dirt-container">
-                    <div class="dirt-cube" style="transform: rotateY(0deg) translateZ(75px);"></div>
-                    <div class="dirt-cube" style="transform: rotateY(90deg) translateZ(75px);"></div>
-                    <div class="dirt-cube" style="transform: rotateY(180deg) translateZ(75px);"></div>
-                    <div class="dirt-cube" style="transform: rotateY(-90deg) translateZ(75px);"></div>
-                    <div class="dirt-cube" style="transform: rotateX(90deg) translateZ(75px);"></div>
-                    <div class="dirt-cube" style="transform: rotateX(-90deg) translateZ(75px);"></div>
-                </div>
+        <!-- RIGHT: CONTENT -->
+        <div class="right-side">
+            <!-- Navigation -->
+            <div class="nav-grid">
+                <div class="nav-btn active" onclick="showPage('home-page')" title="Home"><i class="fas fa-home" style="color: var(--primary)"></i></div>
+                <div class="nav-btn" onclick="showPage('page-tl')" title="Launchers"><b>TL</b></div>
+                <div class="nav-btn" onclick="showPage('page-clients')" title="Clients"><i class="fas fa-cube" style="color: #48ff00"></i></div>
+                <div class="nav-btn" onclick="showPage('page-cheats')" title="Cheats"><i class="fas fa-skull" style="color: red"></i></div>
             </div>
 
-            <div class="right-side">
-                <div class="nav-grid">
-                    <div class="nav-btn active" onclick="showPage('home-page')"><i class="fas fa-home"></i></div>
-                    <div class="nav-btn" onclick="showPage('page-tl')"><b>TL</b></div>
-                    <div class="nav-btn" onclick="showPage('page-clients')"><i class="fas fa-cube"></i></div>
-                    <div class="nav-btn" onclick="showPage('page-cheats')"><i class="fas fa-skull"></i></div>
+            <!-- PAGE 1: HOME -->
+            <div id="home-page" class="page-content active">
+                <h1 class="main-title">ATLOP ULTIMATE</h1>
+                <div class="subtitle">BEST MINECRAFT ECOSYSTEM</div>
+
+                <!-- History & Pros/Cons -->
+                <div class="history-box">
+                    <h3 style="color: var(--primary); margin-bottom: 10px;"><i class="fas fa-history"></i> VỀ T-LAUNCHER</h3>
+                    <p style="font-size: 0.9rem; line-height: 1.5; margin-bottom: 15px;">
+                        TLauncher là trình khởi chạy Minecraft phổ biến nhất thế giới dành cho người chơi không bản quyền (Non-Premium). Ra mắt từ 2013, nó đã thay đổi cách hàng triệu người tiếp cận game.
+                    </p>
+                    <div class="pros-cons-grid">
+                        <div class="pc-col pros">
+                            <h4>ƯU ĐIỂM (PROS)</h4>
+                            <ul class="pc-list">
+                                <li>Miễn phí 100%, dễ cài đặt.</li>
+                                <li>Có hệ thống Skin/Cape riêng.</li>
+                                <li>Cài Modpack/Fabric/Forge 1 click.</li>
+                                <li>Hỗ trợ Tiếng Việt tốt.</li>
+                            </ul>
+                        </div>
+                        <div class="pc-col cons">
+                            <h4>NHƯỢC ĐIỂM (CONS)</h4>
+                            <ul class="pc-list">
+                                <li>Không vào được Server Premium (Hypixel).</li>
+                                <li>Có tranh cãi về bảo mật/Spyware.</li>
+                                <li>Skin chỉ hiện với người dùng TL.</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="home-page" class="page-content active">
-                    <h1 class="main-title">ATLOP</h1>
-                    <div class="subtitle">PREMIUM MINECRAFT HUB</div>
-
-                    <div class="history-box">
-                        <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fas fa-bolt"></i> SYSTEM INFO</h3>
-                        <p style="font-size: 0.95rem; line-height: 1.6; opacity: 0.8;">
-                            Chào mừng đến với hệ sinh thái ATLOP. Tại đây chúng tôi cung cấp những giải pháp tốt nhất cho trải nghiệm Minecraft của bạn từ Launcher đến các bản Hack/Cheat an toàn nhất.
-                        </p>
+                <!-- BIG ACTION BUTTONS -->
+                <div class="big-action-grid">
+                    <div class="action-card card-mod" onclick="openModShop()">
+                        <i class="fab fa-java" style="font-size: 3rem; color: #48ff00; margin-bottom: 10px;"></i>
+                        <b>KHO 600+ MODS</b>
+                        <span style="font-size:0.7rem;">Fabric / Forge / Quilt</span>
                     </div>
-
-                    <div class="big-action-grid">
-                        <div class="action-card" onclick="openModShop()" style="color: #48ff00;">
-                            <i class="fas fa-boxes" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
-                            <b>600+ MODS</b>
-                        </div>
-                        <div class="action-card" onclick="openBugReport()" style="color: #ff4444;">
-                            <i class="fas fa-bug" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
-                            <b>REPORT</b>
-                        </div>
-                        <div class="action-card" id="admin-card-btn" style="color: gold;">
-                            <i class="fas fa-crown" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
-                            <b>ADMIN CP</b>
-                        </div>
+                    <div class="action-card card-bug" onclick="openBugReport()">
+                        <i class="fas fa-bug" style="font-size: 3rem; color: #ff4444; margin-bottom: 10px;"></i>
+                        <b>BÁO LỖI</b>
+                        <span style="font-size:0.7rem;">Gửi Admin</span>
                     </div>
-
-                    <div class="long-section">
-                        <h2>1. GIỚI THIỆU HỆ THỐNG</h2>
-                        <p>Hệ thống được thiết kế tối ưu hóa cho hiệu suất cao nhất. Không sử dụng hình ảnh giúp giảm thời gian tải trang xuống mức tối thiểu nhưng vẫn đảm bảo thẩm mỹ bằng hiệu ứng đổ bóng và ánh sáng neon.</p>
+                    <div class="action-card card-admin" id="admin-card-btn" onclick="openAdminPanel()">
+                        <i class="fas fa-user-secret" style="font-size: 3rem; color: gold; margin-bottom: 10px;"></i>
+                        <b>ADMIN CP</b>
+                        <span style="font-size:0.7rem;">Đã xác minh</span>
                     </div>
+                </div>
 
-                    <div class="long-section">
-                        <h2>2. BẢNG XẾP HẠNG CHEATS</h2>
-                        <div style="display: grid; gap: 15px;">
-                            <div style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
-                                <span><b>1. METEOR CLIENT</b></span>
-                                <span style="color: var(--primary);">UNBEATABLE</span>
+                <!-- MỤC 1: TLAUNCHER LÀ GÌ? -->
+                <div class="long-section">
+                    <h2>1. TLAUNCHER LÀ GÌ & AI TẠO RA?</h2>
+                    <p>TLauncher (thường được gọi tắt là TL) là một trình khởi chạy (launcher) bên thứ ba cho trò chơi Minecraft, cho phép người dùng chơi game mà không cần mua tài khoản bản quyền từ Mojang hay Microsoft. Đây là một trong những công cụ lâu đời nhất và có sức ảnh hưởng lớn nhất trong cộng đồng Minecraft "Crack".</p>
+                    <p>Người tạo ra phiên bản TLauncher gốc đầu tiên là <b>Artur Zhiltsov</b>, một lập trình viên người Nga. Tuy nhiên, lịch sử của TL rất phức tạp vì có sự tranh chấp giữa "TLauncher.org" (phiên bản hiện tại phổ biến nhất) và "TL Legacy". Phiên bản .org hiện nay được quản lý bởi một đội ngũ chuyên nghiệp, cung cấp máy chủ tải tài nguyên riêng và hệ thống skin độc lập.</p>
+                    <p>TL cung cấp khả năng cài đặt nhanh các phiên bản Minecraft từ Alpha đến các bản Snapshot mới nhất chỉ với vài cú nhấp chuột. Nó còn tích hợp sẵn Forge, Fabric và Optifine, giúp người dùng tiết kiệm hàng giờ đồng hồ cấu hình thủ công. Với hàng chục triệu lượt tải xuống, TL đã trở thành một hệ sinh thái không thể thiếu đối với các game thủ ở các quốc gia đang phát triển, nơi mà việc mua game bản quyền với giá $26.95 vẫn còn là một rào cản tài chính lớn.</p>
+                    <p>Bất chấp những tranh cãi về vấn đề bản quyền và bảo mật (spyware), TLauncher vẫn đứng vững nhờ giao diện thân thiện và tính năng đồng bộ hóa mod tuyệt vời.</p>
+                </div>
+
+                <!-- MỤC 2: LỊCH SỬ PHÁT TRIỂN -->
+                <div class="long-section">
+                    <h2>2. LỊCH SỬ PHÁT TRIỂN CÁC LOẠI T-LAUNCHER</h2>
+                    <p>Lịch sử của TLauncher bắt đầu từ những năm 2013 tại Nga. Ban đầu, nó chỉ là một dự án nhỏ của Artur nhằm giúp cộng đồng chơi Minecraft dễ dàng hơn. Giai đoạn 2013-2015, TL phát triển bùng nổ nhờ tính năng hỗ trợ Skin mà các đối thủ lúc bấy giờ như Shiginima hay KeiNett không có.</p>
+                    <p>Năm 2016, một bước ngoặt xảy ra khi xuất hiện sự tranh chấp thương hiệu. Một công ty đã đăng ký bản quyền cái tên "TLauncher" và tiếp quản trang web tlauncher.org. Điều này dẫn đến sự ra đời của <b>TL Legacy</b> (phiên bản kế thừa tinh thần của Artur) và <b>TLauncher.org</b> (phiên bản thương mại hóa). TL Legacy giữ giao diện cổ điển và mã nguồn sạch, trong khi TLauncher.org tập trung vào các tính năng hiện đại và quảng cáo.</p>
+                    <p>Năm 2018, TLauncher tích hợp hệ thống cài Modpack tự động, cho phép chơi RLcraft, SkyFactory chỉ bằng 1 click. Đây là cú hích khiến TL bỏ xa mọi đối thủ. Đến năm 2021, khi Minecraft yêu cầu chuyển đổi sang tài khoản Microsoft, TLauncher cũng nhanh chóng cập nhật hệ thống để hỗ trợ cả người chơi bản quyền và người chơi miễn phí một cách song song.</p>
+                    <p>Hiện nay, bên cạnh TL trên PC, còn có sự xuất hiện của các phiên bản trên di động như <b>PojavLauncher</b> (giả lập Minecraft Java trên Android) được cộng đồng coi là "truyền nhân" của tinh thần TLauncher trên Mobile. Hành trình 10 năm của TL là minh chứng cho sức sống mãnh liệt của cộng đồng Minecraft phi chính thức trên toàn cầu.</p>
+                </div>
+
+                <!-- MỤC 3: BẢNG XẾP HẠNG CHEAT -->
+                <div class="long-section">
+                    <h2>3. ĐÁNH GIÁ & BẢNG XẾP HẠNG CHEATS</h2>
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 250px;">
+                            <div class="rank-item">
+                                <div class="rank-num">#1</div>
+                                <div style="flex:1;"><b>METEOR CLIENT</b><br><small>Best for 1.20+ Anarchy</small></div>
+                                <div style="color: gold;"><i class="fas fa-star"></i> 5.0</div>
                             </div>
-                            <div style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
-                                <span><b>2. WURST CLIENT</b></span>
-                                <span style="color: var(--primary);">LEGENDARY</span>
+                            <div class="rank-item">
+                                <div class="rank-num">#2</div>
+                                <div style="flex:1;"><b>FUTURE CLIENT</b><br><small>Best Paid Client</small></div>
+                                <div style="color: gold;"><i class="fas fa-star"></i> 4.8</div>
+                            </div>
+                            <div class="rank-item">
+                                <div class="rank-num">#3</div>
+                                <div style="flex:1;"><b>LIQUIDBOUNCE</b><br><small>Classic PvP Cheat</small></div>
+                                <div style="color: gold;"><i class="fas fa-star"></i> 4.5</div>
+                            </div>
+                            <div class="rank-item">
+                                <div class="rank-num">#4</div>
+                                <div style="flex:1;"><b>WURST</b><br><small>Legendary / Multi-tool</small></div>
+                                <div style="color: gold;"><i class="fas fa-star"></i> 4.2</div>
                             </div>
                         </div>
+                        <div style="flex: 1; min-width: 250px; background: rgba(255,0,0,0.1); border-radius: 10px; padding: 15px; text-align: center;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: red;"></i>
+                            <p style="font-weight: bold; margin-top: 10px;">CẢNH BÁO BẢO MẬT</p>
+                            <p style="font-size: 0.8rem;">Sử dụng Cheat có thể khiến bạn bị cấm (Ban) vĩnh viễn khỏi các máy chủ lớn như Hypixel hoặc 2b2t. Hãy cân nhắc kỹ trước khi cài đặt.</p>
+                            <img src="https://static.wikia.nocookie.net/minecraft_gamepedia/images/1/1a/Banned_Screen.png" style="width: 100%; margin-top: 10px; border-radius: 5px;" alt="Banned">
+                        </div>
                     </div>
-
-                    <div style="margin-top: 40px; font-family: 'Orbitron'; letter-spacing: 2px; opacity: 0.5;">✦ DESIGN BY ATLP ✦</div>
                 </div>
 
-                <div id="page-tl" class="page-content">
-                    <h2 class="main-title" style="font-size: 2.5rem;">LAUNCHERS</h2>
-                    <div class="dl-grid" id="launcher-list"></div>
+                <!-- MỤC 4: TOP MODS -->
+                <div class="long-section">
+                    <h2>4. TOP CÁC MOD PHẢI CÓ (MUST-HAVE)</h2>
+                    <ul style="list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <li>💎 <b>Sodium:</b> Tăng FPS gấp 3-5 lần bản gốc.</li>
+                        <li>🌈 <b>Iris Shaders:</b> Chạy Shaders cực mượt trên Fabric.</li>
+                        <li>🗺️ <b>Xaero's Minimap:</b> Bản đồ nhỏ gọn, tiện lợi nhất.</li>
+                        <li>🍎 <b>AppleSkin:</b> Hiển thị độ no và hồi máu của thức ăn.</li>
+                        <li>📦 <b>JEI:</b> Tra cứu công thức chế tạo ngay trong game.</li>
+                        <li>🔭 <b>Zoomify:</b> Tính năng zoom siêu cấp (thay thế Optifine).</li>
+                        <li>🔧 <b>WorldEdit:</b> Công cụ xây dựng dành cho kiến trúc sư.</li>
+                        <li>⚡ <b>Lithium:</b> Tối ưu hóa logic game cho Server/Client.</li>
+                    </ul>
                 </div>
 
-                <div id="page-clients" class="page-content">
-                    <h2 class="main-title" style="font-size: 2.5rem;">CLIENTS</h2>
-                    <div class="dl-grid" id="client-list"></div>
-                </div>
+                <div style="font-family: monospace; color: #888; margin-top: 30px;">✦ DESIGN BY ĐẶNG PHÚC ANH ✦</div>
+            </div>
 
-                <div id="page-cheats" class="page-content">
-                    <h2 class="main-title" style="font-size: 2.5rem; color: #ff4444;">CHEATS</h2>
-                    <div class="dl-grid" id="cheat-list"></div>
-                </div>
+            <!-- PAGE 2: LAUNCHERS -->
+            <div id="page-tl" class="page-content">
+                <h2 class="main-title" style="font-size: 2rem;">LAUNCHERS DOWNLOAD</h2>
+                <div class="dl-grid" id="launcher-list"></div>
             </div>
-        </div>
 
-        <div class="creator-footer">
-            <div>
-                <h4 style="color: var(--primary);">HỆ THỐNG</h4>
-                <p style="opacity: 0.6; font-size: 0.85rem; margin-top: 10px;">Phát triển bởi ATLP. Toàn bộ mã nguồn được tối ưu hóa hiệu suất.</p>
+            <!-- PAGE 3: CLIENTS -->
+            <div id="page-clients" class="page-content">
+                <h2 class="main-title" style="font-size: 2rem; --primary: #48ff00;">LEGIT CLIENTS</h2>
+                <div class="dl-grid" id="client-list"></div>
             </div>
-            <div>
-                <h4 style="color: var(--secondary);">CỘNG ĐỒNG</h4>
-                <p style="opacity: 0.6; font-size: 0.85rem; margin-top: 10px;">Hỗ trợ hơn 10,000 người chơi hàng tháng trên toàn thế giới.</p>
-            </div>
-            <div style="text-align: right;">
-                <h4 style="color: gold;">BẢN QUYỀN</h4>
-                <p style="opacity: 0.6; font-size: 0.85rem; margin-top: 10px;">&copy; 2024 ATLP HUB. All rights reserved.</p>
-            </div>
-        </div>
-    </div>
 
-    <!-- AUTH MODAL -->
-    <div id="auth-modal" class="modal-overlay hidden">
-        <div class="modal-box">
-            <span class="modal-close" onclick="closeModal('auth-modal')">&times;</span>
-            <h2 id="auth-title" style="color: var(--primary); text-align: center; margin-bottom: 25px;">ĐĂNG NHẬP</h2>
-            <input type="text" id="auth-user" class="auth-input" placeholder="Tài khoản">
-            <input type="password" id="auth-pass" class="auth-input" placeholder="Mật khẩu">
-            <button class="btn-buy" style="width: 100%; height: 50px;" onclick="handleAuth()">XÁC NHẬN</button>
-            <p id="auth-switch" style="text-align: center; margin-top: 20px; cursor: pointer; opacity: 0.7;" onclick="switchAuth()">Chưa có tài khoản? Tạo ngay</p>
+            <!-- PAGE 4: CHEATS -->
+            <div id="page-cheats" class="page-content">
+                <h2 class="main-title" style="font-size: 2rem; --primary: red;">HACK & CHEATS</h2>
+                <div class="dl-grid" id="cheat-list"></div>
+            </div>
         </div>
     </div>
 
-    <!-- MOD SHOP MODAL -->
-    <div id="mod-modal" class="modal-overlay hidden">
-        <div class="modal-box" style="max-width: 900px;">
-            <span class="modal-close" onclick="closeModal('mod-modal')">&times;</span>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="color: var(--primary);">MOD STORE</h2>
-                <div style="color: gold;">Balance: <span id="shop-balance">0 $</span></div>
-            </div>
-            <div class="dl-grid" id="mod-container" style="max-height: 400px; overflow-y: auto;"></div>
+    <!-- DANH SÁCH NGƯỜI TẠO -->
+    <div class="creator-footer">
+        <div>
+            <h4 style="color: var(--primary); margin-bottom: 10px;">MOJANG / MICROSOFT</h4>
+            <p style="font-size: 0.8rem;">Notch (Markus Persson), Jens Bergensten. Đơn vị sở hữu bản quyền Minecraft toàn cầu.</p>
+        </div>
+        <div>
+            <h4 style="color: #48ff00;">TLAUNCHER TEAM</h4>
+            <p style="font-size: 0.8rem;">Artur Zhiltsov (Original Dev). Đội ngũ TLauncher.org quản lý hiện tại.</p>
+        </div>
+        <div>
+            <h4 style="color: red;">CHEAT CREATORS</h4>
+            <p style="font-size: 0.8rem;">Meteor Team (Minegame159), Alexander019 (Wurst), LiquidBounce Team.</p>
+        </div>
+        <div>
+            <h4 style="color: var(--secondary);">DEVELOPER</h4>
+            <p style="font-size: 0.8rem;"><b>Đặng Phúc Anh</b>. Người xây dựng giao diện ATLOP Client Ultimate.</p>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script>
-        particlesJS("particles-js", {"particles":{"number":{"value":60},"color":{"value":"#00ffcc"},"opacity":{"value":0.2},"size":{"value":3},"line_linked":{"enable":true,"distance":150,"color":"#00ffcc","opacity":0.1},"move":{"enable":true,"speed":1}}});
+<!-- MOD SHOP MODAL -->
+<div id="mod-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <span class="modal-close" onclick="closeModal('mod-modal')">&times;</span>
+        <div class="shop-header">
+            <h2 style="color: var(--dirt-glow); font-family: 'Orbitron';">MEGA MOD STORE (600+)</h2>
+            <input type="text" class="search-bar" id="mod-search" placeholder="Tìm kiếm Mod..." oninput="filterMods()">
+            <div style="font-size: 0.9rem; color: #aaa;">Balance: <span id="shop-balance">0 $</span></div>
+        </div>
+        <div class="mod-grid" id="mod-container"></div>
+    </div>
+</div>
 
-        let userMoney = parseInt(localStorage.getItem('atlop_money')) || 0;
-        let currentUser = localStorage.getItem('atlop_user') || null;
-        let isLoginMode = true;
+<!-- BUG REPORT MODAL -->
+<div id="bug-modal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width: 500px;">
+        <span class="modal-close" onclick="closeModal('bug-modal')">&times;</span>
+        <h2 style="color: #ff4444; font-family: 'Orbitron'; margin-bottom: 20px;">BÁO CÁO LỖI</h2>
+        <p style="margin-bottom: 10px;">Mô tả lỗi bạn gặp phải:</p>
+        <textarea id="bug-text" style="width: 100%; height: 150px; background: #222; color: white; border: 1px solid #444; padding: 10px; border-radius: 5px;"></textarea>
+        <button class="btn-buy" style="margin-top: 15px; width: 100%; background: #ff4444;" onclick="sendBugReport()">GỬI BÁO CÁO</button>
+    </div>
+</div>
 
-        function updateUI() {
-            document.getElementById('money-display').innerText = userMoney + " $";
-            if(currentUser) document.getElementById('auth-btn').innerText = currentUser.toUpperCase();
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+    // --- 1. CONFIG & INIT ---
+    particlesJS("particles-js", {"particles":{"number":{"value":50},"color":{"value":"#ffffff"},"opacity":{"value":0.3},"size":{"value":3,"random":true},"line_linked":{"enable":true,"distance":150,"color":"#ffffff","opacity":0.2},"move":{"enable":true,"speed":2}}});
+
+    let userMoney = parseInt(localStorage.getItem('atlop_money')) || 0;
+    document.getElementById('money-display').innerText = userMoney + " $";
+
+    // Kiểm tra quyền Admin khi tải trang
+    if(localStorage.getItem('is_admin') === 'true') {
+        document.getElementById('admin-card-btn').style.display = 'flex';
+    }
+
+    // --- 2. DATA GENERATOR ---
+    const launchers = [
+        {name: "TLauncher (Blue)", icon: "https://tlauncher.org/favicon.ico", link: "https://tlauncher.org/"},
+        {name: "TL Legacy (Red)", icon: "https://tllegacy.com/favicon.ico", link: "https://tllegacy.com/"},
+        {name: "SKLauncher", icon: "https://skmedix.pl/favicon.ico", link: "https://skmedix.pl/"},
+        {name: "PojavLauncher (Phone)", icon: "https://pojavlauncherteam.github.io/img/logo.png", link: "https://pojavlauncherteam.github.io/"},
+        {name: "ATLauncher", icon: "https://atlauncher.com/assets/images/logo.png", link: "https://atlauncher.com/"},
+        {name: "MultiMC", icon: "https://multimc.org/favicon.ico", link: "https://multimc.org/"},
+        {name: "Prism Launcher", icon: "https://prismlauncher.org/favicon.ico", link: "https://prismlauncher.org/"},
+        {name: "FCL (FLauncher)", icon: "https://raw.githubusercontent.com/FCL-Team/FoldCraftLauncher/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png", link: "#"}
+    ];
+
+    const clients = ["Lunar Client", "Badlion Client", "Feather Client", "LabyMod 4", "Salwyrr", "BatMod", "PvPLounge", "CM Pack", "Pixel Client", "Melon Client", "Ares Client", "Hyperium", "Cosmic Client", "CheatBreaker (Remake)", "OldAnimations", "SkyClient", "Foxical Client", "Blaze Client", "Crystal Client", "OptiFine User"];
+    const cheats = ["Meteor Client", "Wurst", "Aristois", "BleachHack", "LiquidBounce", "Sigma 5.0", "Inertia", "Impact", "Kami Blue", "Phobos", "Lambda", "RusherHack", "Future Client", "Vape V4 (Crack)", "Doomsday", "Huzuni", "Flux", "Astolfo", "Novoline", "Rise Client"];
+
+    let allMods = [];
+    const realMods = ["Sodium", "Iris", "Lithium", "Phosphor", "ModMenu", "Appleskin", "JEI", "REI", "Xaero's Map", "JourneyMap", "Litematica", "Baritone", "Physics Mod", "Replay Mod", "OptiFine", "Controllable", "WorldEdit", "ViaFabric", "Fabric API", "Cloth Config", "BetterF3", "Zoomify", "LambDynamicLights", "Continuity", "Indium", "Debugify", "Cull Leaves", "Entity Culling", "FerriteCore", "LazyDFU"];
+    const prefixes = ["Super", "Ultra", "Mega", "Hyper", "Pro", "Epic", "Extreme", "Advanced", "Better", "Simple"];
+    const nouns = ["PvP", "FPS", "Lighting", "Storage", "Tools", "Combat", "Movement", "Building", "World", "Chat"];
+    const suffixes = ["Booster", "Plus", "V2", "Pro", "Master", "Fix", "Optimizer", "Tweaker", "Addon", "Utility"];
+
+    function generateMods() {
+        realMods.forEach(name => { allMods.push({ name: name, price: 0, type: "Real Mod" }); });
+        for (let i = 0; i < 570; i++) {
+            const p = prefixes[Math.floor(Math.random() * prefixes.length)];
+            const n = nouns[Math.floor(Math.random() * nouns.length)];
+            const s = suffixes[Math.floor(Math.random() * suffixes.length)];
+            const price = Math.random() > 0.7 ? Math.floor(Math.random() * 500) + 100 : 0;
+            allMods.push({ name: `${p} ${n} ${s}`, price: price, type: "Generated" });
         }
+    }
+    generateMods();
+
+    // --- 3. RENDER FUNCTIONS ---
+    function renderLists() {
+        const lDiv = document.getElementById('launcher-list');
+        lDiv.innerHTML = "";
+        launchers.forEach(l => {
+            lDiv.innerHTML += `<a href="${l.link}" target="_blank" class="dl-item"><img src="${l.icon}" onerror="this.src='https://static.wikia.nocookie.net/minecraft_gamepedia/images/2/2f/Dirt.png'"><div style="font-weight:bold; text-align:center;">${l.name}</div></a>`;
+        });
+
+        const cDiv = document.getElementById('client-list');
+        cDiv.innerHTML = "";
+        clients.forEach(c => {
+            cDiv.innerHTML += `<div class="dl-item" style="border-color:#48ff00"><i class="fas fa-cube" style="font-size:2rem; color:#48ff00; margin-bottom:10px;"></i><b>${c}</b></div>`;
+        });
+
+        const hDiv = document.getElementById('cheat-list');
+        hDiv.innerHTML = "";
+        cheats.forEach(c => {
+            hDiv.innerHTML += `<div class="dl-item" style="border-color:red"><i class="fas fa-skull" style="font-size:2rem; color:red; margin-bottom:10px;"></i><b>${c}</b></div>`;
+        });
+    }
+    renderLists();
+
+    // --- 4. LOGIC FUNCTIONS ---
+    function openModShop() {
+        document.getElementById('mod-modal').classList.remove('hidden');
+        document.getElementById('shop-balance').innerText = userMoney + " $";
+        renderMods(allMods);
+    }
+
+    function renderMods(list) {
+        const container = document.getElementById('mod-container');
+        container.innerHTML = "";
+        const displayList = list.length > 600 ? list.slice(0, 100) : list;
+        displayList.forEach(mod => {
+            const div = document.createElement('div');
+            div.className = 'mod-card';
+            div.innerHTML = `
+                <div style="font-weight:bold; color:var(--primary)">${mod.name}</div>
+                <div style="font-size:0.8rem; color:#888;">${mod.type}</div>
+                <div class="mod-price">${mod.price === 0 ? "FREE" : mod.price + " $"}</div>
+                <button class="btn-buy" onclick="buyMod('${mod.name}', ${mod.price})">${mod.price === 0 ? "TẢI" : "MUA"}</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function filterMods() {
+        const term = document.getElementById('mod-search').value.toLowerCase();
+        const filtered = allMods.filter(m => m.name.toLowerCase().includes(term));
+        renderMods(filtered.slice(0, 100));
+    }
+
+    function buyMod(name, price) {
+        if (price === 0) return alert(`Đang tải ${name}... (Giả lập)`);
+        if (userMoney >= price) {
+            if(confirm(`Mua ${name} với giá ${price}$?`)) {
+                userMoney -= price;
+                localStorage.setItem('atlop_money', userMoney);
+                updateUI();
+                alert("Mua thành công!");
+            }
+        } else { alert("Không đủ tiền!"); }
+    }
+
+    // Điểm danh 1 lần/ngày
+    function dailyCheckIn() {
+        const lastCheck = localStorage.getItem('atlop_last_checkin');
+        const today = new Date().toDateString();
+
+        if (lastCheck === today) {
+            alert("Hôm nay bạn đã điểm danh rồi! Hãy quay lại vào ngày mai.");
+            return;
+        }
+
+        userMoney += 100;
+        localStorage.setItem('atlop_money', userMoney);
+        localStorage.setItem('atlop_last_checkin', today);
         updateUI();
+        alert("Điểm danh thành công! +100$");
+    }
 
-        const data = {
-            launchers: ["TLauncher", "TL Legacy", "SKLauncher", "PojavLauncher", "ATLauncher", "Prism"],
-            clients: ["Lunar Client", "Badlion", "Feather", "LabyMod", "Salwyrr", "PvPLounge"],
-            cheats: ["Meteor Client", "Wurst", "LiquidBounce", "Aristois", "Future", "Vape V4"]
-        };
+    function updateUI() {
+        document.getElementById('money-display').innerText = userMoney + " $";
+        const shopBal = document.getElementById('shop-balance');
+        if(shopBal) shopBal.innerText = userMoney + " $";
+    }
 
-        function renderAll() {
-            const render = (id, list, icon) => {
-                const el = document.getElementById(id);
-                el.innerHTML = list.map(item => `
-                    <div class="dl-item">
-                        <i class="fas ${icon}"></i>
-                        <b>${item}</b>
-                        <button class="btn-buy" style="padding: 5px 15px; font-size: 0.7rem;">DOWNLOAD</button>
-                    </div>
-                `).join('');
-            };
-            render('launcher-list', data.launchers, 'fa-rocket');
-            render('client-list', data.clients, 'fa-cube');
-            render('cheat-list', data.cheats, 'fa-user-secret');
+    function showPage(pageId) {
+        document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden'); }
+    function setThemeColor(color) { 
+        document.documentElement.style.setProperty('--primary', color); 
+        document.documentElement.style.setProperty('--dirt-glow', color);
+    }
+    function toggleLightMode() {
+        const body = document.body;
+        body.setAttribute('data-theme', body.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    }
+
+    // Hệ thống Admin
+    function openAdmin() {
+        const pass = prompt("Nhập mật khẩu Admin:");
+        if(pass === "Anhdang4112@gmail.com@@@@") {
+            alert("Xác nhận Admin thành công!");
+            localStorage.setItem('is_admin', 'true');
+            document.getElementById('admin-card-btn').style.display = 'flex';
+        } else {
+            alert("Sai mật khẩu!");
         }
-        renderAll();
+    }
 
-        function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
-        function switchAuth() {
-            isLoginMode = !isLoginMode;
-            document.getElementById('auth-title').innerText = isLoginMode ? "ĐĂNG NHẬP" : "ĐĂNG KÝ";
-            document.getElementById('auth-switch').innerText = isLoginMode ? "Chưa có tài khoản? Đăng ký" : "Đã có tài khoản? Đăng nhập";
-        }
+    function openAdminPanel() {
+        alert("Chào mừng Admin Đặng Phúc Anh! Chức năng quản lý hệ thống đang được tải...");
+    }
 
-        function handleAuth() {
-            const u = document.getElementById('auth-user').value;
-            if(!u) return alert("Nhập tên!");
-            currentUser = u;
-            localStorage.setItem('atlop_user', u);
-            updateUI();
-            closeModal('auth-modal');
-        }
+    // Hệ thống Báo Lỗi
+    function openBugReport() {
+        document.getElementById('bug-modal').classList.remove('hidden');
+    }
 
-        function openModShop() {
-            document.getElementById('mod-modal').classList.remove('hidden');
-            document.getElementById('shop-balance').innerText = userMoney + " $";
-            const container = document.getElementById('mod-container');
-            container.innerHTML = Array.from({length: 20}, (_, i) => `
-                <div class="dl-item">
-                    <b style="color:var(--primary)">Premium Mod #${i+1}</b>
-                    <span style="color:gold">50 $</span>
-                    <button class="btn-buy" onclick="buyMod(50)">MUA</button>
-                </div>
-            `).join('');
-        }
+    function sendBugReport() {
+        const text = document.getElementById('bug-text').value;
+        if(text.trim() === "") return alert("Vui lòng nhập nội dung!");
+        alert("Đã gửi báo cáo đến Admin: " + text);
+        document.getElementById('bug-text').value = "";
+        closeModal('bug-modal');
+    }
 
-        function buyMod(p) {
-            if(userMoney < p) return alert("Hết tiền!");
-            userMoney -= p;
-            localStorage.setItem('atlop_money', userMoney);
-            updateUI();
-            alert("Mua thành công!");
-        }
-
-        function dailyCheckIn() {
-            const last = localStorage.getItem('atlop_last');
-            if(last === new Date().toDateString()) return alert("Hôm nay đã điểm danh!");
-            userMoney += 100;
-            localStorage.setItem('atlop_money', userMoney);
-            localStorage.setItem('atlop_last', new Date().toDateString());
-            updateUI();
-            alert("Đã nhận 100$!");
-        }
-
-        function showPage(p) {
-            document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(p).classList.add('active');
-        }
-
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden'); }
-        function toggleLightMode() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
-        function goHome() { showPage('home-page'); }
-    </script>
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function goHome() { showPage('home-page'); }
+</script>
 </body>
 </html>
